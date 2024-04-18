@@ -79,7 +79,9 @@ func Test_If_The_User_Fetched_When_Search_By_UserName(t *testing.T) {
 	userRepo := NewUserRepository(db)
 	fetchedUser, err := userRepo.GetUserByUserName("eduardolima806")
 
-	t.Errorf("error was not expected while fetching user: %s", err)
+	if err != nil {
+		t.Errorf("error was not expected while fetching user: %s", err)
+	}
 
 	expectedUser := &domain.User{ID: 1,
 		UserName:    "eduardolima806",
