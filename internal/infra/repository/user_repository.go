@@ -6,7 +6,7 @@ import (
 	"github.com/eduardolima806/my-chat-server/internal/domain"
 )
 
-const IdError = -1
+const IdError = int32(-1)
 
 type UserRepository struct {
 	Db *sql.DB
@@ -29,7 +29,12 @@ func (userRepo *UserRepository) Save(user *domain.User) (int32, error) {
 	return int32(lastInsertId), nil
 }
 
-func (userRepo *UserRepository) GetUserByID(id int32) (*domain.User, error) {
-	// TODO: Implements this method
-	return nil, nil
+func (userRepo *UserRepository) GetUserByUserName(userName string) (*domain.User, error) {
+	user := domain.User{}
+	err := userRepo.Db.QueryRow("SELECT id, username, displayname, email, password, created FROM app_user WHERE username = $1", userName).Scan(
+		&user.ID, &user.UserName, &user.DisplayName, &user.Email, &user.Password, &user.Created)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

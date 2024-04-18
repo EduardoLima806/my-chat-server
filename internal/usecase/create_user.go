@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"database/sql"
+	"errors"
+
 	"github.com/eduardolima806/my-chat-server/internal/domain"
 )
 
@@ -32,11 +35,24 @@ func (cUser *CreateUserUseCase) Execute(userInput UserInput) (*UserOutput, error
 	if err != nil {
 		return nil, err
 	}
-	// TODO: Check if the username not exits before create
+
+	// TODO: Check if exists e-mail as well ?
+	userToCheck, err := cUser.UserRepository.GetUserByUserName(userInput.UserName)
+
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+
+	if userToCheck != nil {
+		return nil, errors.New("username already exists")
+	}
+
 	idUserCreated, err := cUser.UserRepository.Save(user)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &UserOutput{
 		CreatedUserId: idUserCreated,
 	}, nil
