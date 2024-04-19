@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/eduardolima806/my-chat-server/internal/domain"
+	"github.com/eduardolima806/my-chat-server/internal/util"
 )
 
 type UserInput struct {
@@ -40,6 +41,12 @@ func (cUser *CreateUserUseCase) Execute(userInput UserInput) (*UserOutput, error
 	err = checkIfUserExists(cUser, userInput)
 	if err != nil {
 		return nil, err
+	}
+
+	user.Password, err = util.HashPassword(user.Password)
+
+	if err != nil {
+		return nil, errors.New("could not be possible encrypt password")
 	}
 
 	idUserCreated, err := cUser.UserRepository.Save(user)

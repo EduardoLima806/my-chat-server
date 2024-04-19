@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS app_user (
   username varchar(50) NOT NULL,
   displayname varchar(255),
   email varchar(150) NOT NULL,
-  password varchar(50) NOT NULL,
+  password varchar(150) NOT NULL,
   created timestamp NOT NULL,
   PRIMARY KEY (id)
 )\gexec
