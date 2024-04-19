@@ -7,6 +7,7 @@ import (
 	"github.com/eduardolima806/my-chat-server/internal/infra/db"
 	"github.com/eduardolima806/my-chat-server/internal/infra/repository"
 	"github.com/eduardolima806/my-chat-server/internal/usecase"
+	"github.com/eduardolima806/my-chat-server/internal/util"
 	"github.com/joho/godotenv"
 )
 
@@ -23,7 +24,8 @@ func main() {
 	defer conn.Close()
 
 	userRepo := repository.NewUserRepository(conn)
-	createUserUc := usecase.NewCreateUserUseCase(userRepo)
+	passwordHasher := &util.DefaultPasswordHasher{}
+	createUserUc := usecase.NewCreateUserUseCase(userRepo, passwordHasher)
 	input := usecase.UserInput{UserName: "eduardolima806", DisplayName: "Eduardo Lima", Email: "eduardolima.dev.io@gmail.com", Password: "P4$$w0rd001"}
 	output, err := createUserUc.Execute(input)
 	if err != nil {

@@ -9,12 +9,28 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/eduardolima806/my-chat-server/internal/infra/repository"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
+
+type MockPasswordHasher struct {
+	mock.Mock
+}
+
+func (h *MockPasswordHasher) HashPassword(arg1 string) (string, error) {
+	args := h.Called(arg1)
+	return args.String(0), args.Error(1)
+}
+
+func (h *MockPasswordHasher) VerifyPassword(arg1 string, arg2 string) bool {
+	args := h.Called(arg1, arg2)
+	return args.Bool(0)
+}
 
 func Test_If_Get_Error_To_Create_Invalid_User(t *testing.T) {
 	userRepository := repository.NewUserRepository(nil)
+	passHasherMock := &MockPasswordHasher{}
 	userInput := UserInput{UserName: "ed12"}
-	ucCreate := NewCreateUserUseCase(userRepository)
+	ucCreate := NewCreateUserUseCase(userRepository, passHasherMock)
 	_, err := ucCreate.Execute(userInput)
 	assert.EqualError(t, err, "username must has at least 5 alphanumerics characters")
 }
@@ -22,8 +38,9 @@ func Test_If_Get_Error_To_Create_Invalid_User(t *testing.T) {
 func Test_If_Get_Error_When_Create_An_Existing_User(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	userRepository := repository.NewUserRepository(db)
+	passHasherMock := &MockPasswordHasher{}
 	userInput := UserInput{UserName: "eduardolima806", Email: "eduardolima.dev.io@gmail.com", Password: "P4$$w0rd"}
-	ucCreate := NewCreateUserUseCase(userRepository)
+	ucCreate := NewCreateUserUseCase(userRepository, passHasherMock)
 
 	t.Run("username already exists", func(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"id", "username", "displayname", "email", "password", "created"}).AddRow(1, "eduardolima806", "Eduardo Lima", "eduardolima.dev.io@gmail.com", "P4$$w0rd", time.Now())
@@ -48,8 +65,10 @@ func Test_If_Get_Error_When_Create_An_Existing_User(t *testing.T) {
 func Test_User_Is_Created_When_User_No_Existing(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	userRepository := repository.NewUserRepository(db)
+	passHasherMock := &MockPasswordHasher{}
 	userInput := UserInput{UserName: "eduardolimaNew", Email: "eduardolima.dev.io@gmail.com", Password: "P4$$w0rd"}
-	ucCreate := NewCreateUserUseCase(userRepository)
+	ucCreate := NewCreateUserUseCase(userRepository, passHasherMock)
+	passHasherMock.On("HashPassword", userInput.Password).Return("hashedPassword", nil)
 
 	mock.ExpectQuery("SELECT id, username, displayname, email, password, created FROM app_user").WillReturnError(sql.ErrNoRows)
 	mock.ExpectQuery("SELECT id, username, displayname, email, password, created FROM app_user").WillReturnError(sql.ErrNoRows)
@@ -58,4 +77,5 @@ func Test_User_Is_Created_When_User_No_Existing(t *testing.T) {
 
 	userOutput, _ := ucCreate.Execute(userInput)
 	assert.Equal(t, int32(1), userOutput.CreatedUserId)
+	passHasherMock.AssertExpectations(t)
 }

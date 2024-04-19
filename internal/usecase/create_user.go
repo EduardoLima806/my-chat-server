@@ -22,13 +22,15 @@ type UserOutput struct {
 
 type CreateUserUseCase struct {
 	UserRepository domain.UserRepositoryInterface
+	PasswordHasher util.PasswordHasher
 }
 
 const IdDummy = 0
 
-func NewCreateUserUseCase(userRepository domain.UserRepositoryInterface) *CreateUserUseCase {
+func NewCreateUserUseCase(userRepository domain.UserRepositoryInterface, passwordHasher util.PasswordHasher) *CreateUserUseCase {
 	return &CreateUserUseCase{
 		UserRepository: userRepository,
+		PasswordHasher: passwordHasher,
 	}
 }
 
@@ -43,7 +45,7 @@ func (cUser *CreateUserUseCase) Execute(userInput UserInput) (*UserOutput, error
 		return nil, err
 	}
 
-	user.Password, err = util.HashPassword(user.Password)
+	user.Password, err = cUser.PasswordHasher.HashPassword(user.Password)
 
 	if err != nil {
 		return nil, errors.New("could not be possible encrypt password")
