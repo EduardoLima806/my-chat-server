@@ -32,8 +32,11 @@ func NewUser(id int32, userName string, displayName string, email string, passwo
 }
 
 func (u *User) Validate() error {
-	if len(u.UserName) < 5 {
-		return errors.New("username must has at least 5 characters")
+
+	userNameRegex := regexp.MustCompile(`^[a-zA-Z0-9]{5,}$`)
+
+	if !userNameRegex.MatchString(u.UserName) {
+		return errors.New("username must has at least 5 alphanumerics characters")
 	}
 
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)

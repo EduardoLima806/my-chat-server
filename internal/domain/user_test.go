@@ -14,34 +14,63 @@ const (
 	password    = "Pa$$w0rd"
 )
 
-func Test_If_Get_Error_If_UserName_Is_Not_Valid(t *testing.T) {
-	_, err := NewUser(idUser, "ed06", displayName, email, password)
-	assert.Error(t, err, "username must has at least 5 characters")
+func Test_UserName_Is_Or_Not_Is_Valid(t *testing.T) {
+	testsCases := []string{
+		"ed06",
+		"eduardolima806",
+		"eduardo@123",
+	}
+
+	t.Run("username with less then 5 characters", func(t *testing.T) {
+		_, err := NewUser(idUser, testsCases[0], displayName, email, password)
+		assert.Error(t, err, "username must has at least 5 alphanumerics characters")
+	})
+
+	t.Run("username valid", func(t *testing.T) {
+		_, err := NewUser(idUser, testsCases[1], displayName, email, password)
+		assert.Nil(t, err, "username valid")
+	})
+
+	t.Run("username with special characters", func(t *testing.T) {
+		_, err := NewUser(idUser, testsCases[2], displayName, email, password)
+		assert.Error(t, err, "username must has at least 5 alphanumerics characters")
+	})
 }
 
-func Test_If_No_Error_If_UserName_Is_Valid(t *testing.T) {
-	_, err := NewUser(idUser, "eduardolima806", displayName, email, password)
-	assert.Nil(t, err, "The user name is valid")
+func Test_Email_Is_Or_Not_Is_Valid(t *testing.T) {
+
+	testsCases := []string{
+		"invalidmail.com",
+		"validmail@company.com",
+	}
+
+	t.Run("email is not valid", func(t *testing.T) {
+		_, err := NewUser(idUser, userName, displayName, testsCases[0], password)
+		assert.Error(t, err, "email is not valid")
+	})
+
+	t.Run("email is valid", func(t *testing.T) {
+		_, err := NewUser(idUser, userName, displayName, testsCases[1], password)
+		assert.Nil(t, err)
+	})
 }
 
-func Test_If_Get_Error_If_Email_Is_Not_Valid(t *testing.T) {
-	_, err := NewUser(idUser, userName, displayName, "invalidmail.com", password)
-	assert.Error(t, err, "email is not valid")
-}
+func Test_If_Password_Is_Not_Or_Not_Is_Secure(t *testing.T) {
 
-func Test_If_No_Error_If_Email_Is_Valid(t *testing.T) {
-	_, err := NewUser(idUser, userName, displayName, "validmail@company.com", password)
-	assert.Nil(t, err, "email is valid")
-}
+	testsCases := []string{
+		"password123",
+		"P4$$word",
+	}
 
-func Test_If_Get_Error_If_Password_Is_Not_Secure(t *testing.T) {
-	_, err := NewUser(idUser, userName, displayName, email, "password123")
-	assert.Error(t, err, "password is not secure")
-}
+	t.Run("password is not secure", func(t *testing.T) {
+		_, err := NewUser(idUser, userName, displayName, email, testsCases[0])
+		assert.Error(t, err, "password is not secure")
+	})
 
-func Test_If_No_Error_If_Password_Is_Not_Secure(t *testing.T) {
-	_, err := NewUser(idUser, userName, displayName, email, "P4$$word")
-	assert.Nil(t, err, "password is secure")
+	t.Run("password is secure", func(t *testing.T) {
+		_, err := NewUser(idUser, userName, displayName, email, testsCases[1])
+		assert.Nil(t, err)
+	})
 }
 
 func Test_If_Get_No_Error_For_Valid_User(t *testing.T) {

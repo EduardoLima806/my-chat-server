@@ -29,9 +29,9 @@ func (userRepo *UserRepository) Save(user *domain.User) (int32, error) {
 	return int32(lastInsertId), nil
 }
 
-func (userRepo *UserRepository) GetUserByUserName(userName string) (*domain.User, error) {
+func (userRepo *UserRepository) GetUserByUserNameOrEmail(userNameOrEmail string) (*domain.User, error) {
 	user := domain.User{}
-	err := userRepo.Db.QueryRow("SELECT id, username, displayname, email, password, created FROM app_user WHERE username = $1", userName).Scan(
+	err := userRepo.Db.QueryRow("SELECT id, username, displayname, email, password, created FROM app_user WHERE username = $1 or email = $1", userNameOrEmail).Scan(
 		&user.ID, &user.UserName, &user.DisplayName, &user.Email, &user.Password, &user.Created)
 	if err != nil {
 		return nil, err

@@ -3,6 +3,7 @@ package usecase
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/eduardolima806/my-chat-server/internal/domain"
 )
@@ -36,15 +37,9 @@ func (cUser *CreateUserUseCase) Execute(userInput UserInput) (*UserOutput, error
 		return nil, err
 	}
 
-	// TODO: Check if exists e-mail as well ?
-	userToCheck, err := cUser.UserRepository.GetUserByUserName(userInput.UserName)
-
-	if err != nil && err != sql.ErrNoRows {
+	err = checkIfUserExists(cUser, userInput)
+	if err != nil {
 		return nil, err
-	}
-
-	if userToCheck != nil {
-		return nil, errors.New("username already exists")
 	}
 
 	idUserCreated, err := cUser.UserRepository.Save(user)
@@ -56,4 +51,29 @@ func (cUser *CreateUserUseCase) Execute(userInput UserInput) (*UserOutput, error
 	return &UserOutput{
 		CreatedUserId: idUserCreated,
 	}, nil
+}
+
+func checkIfUserExists(cUser *CreateUserUseCase, userInput UserInput) error {
+
+	userToCheck, err := cUser.UserRepository.GetUserByUserNameOrEmail(userInput.UserName)
+
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	if userToCheck != nil && userInput.UserName == userToCheck.UserName {
+		return errors.New("username already exists")
+	}
+
+	userToCheck, err = cUser.UserRepository.GetUserByUserNameOrEmail(userInput.Email)
+
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	if userToCheck != nil && userToCheck.Email == userInput.Email {
+		return fmt.Errorf("already exists an user with this e-email: %s", userInput.Email)
+	}
+
+	return nil
 }

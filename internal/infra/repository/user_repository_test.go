@@ -77,7 +77,7 @@ func Test_If_The_User_Fetched_When_Search_By_UserName(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"id", "username", "displayname", "email", "password", "created"}).AddRow(1, "eduardolima806", "Eduardo Lima", "eduardolima.dev.io@gmail.com", "P4$$w0rd", timestamp)
 	mock.ExpectQuery(selectQuery).WithArgs("eduardolima806").WillReturnRows(rows)
 	userRepo := NewUserRepository(db)
-	fetchedUser, err := userRepo.GetUserByUserName("eduardolima806")
+	fetchedUser, err := userRepo.GetUserByUserNameOrEmail("eduardolima806")
 
 	if err != nil {
 		t.Errorf("error was not expected while fetching user: %s", err)
@@ -107,7 +107,7 @@ func Test_If_Get_Error_When_Search_By_UserName(t *testing.T) {
 	mock.ExpectQuery(selectQuery).WithArgs("eduardolima806").WillReturnError(errors.New("error to get user"))
 	userRepo := NewUserRepository(db)
 
-	_, err = userRepo.GetUserByUserName("eduardolima806")
+	_, err = userRepo.GetUserByUserNameOrEmail("eduardolima806")
 
 	assert.EqualError(t, err, "error to get user")
 
