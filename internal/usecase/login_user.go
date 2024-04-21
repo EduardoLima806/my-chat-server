@@ -16,9 +16,9 @@ type LoginInput struct {
 type LoginErrorType uint8
 
 const (
-	UserLoginNotExists LoginErrorType = 0
-	EmailNotExists     LoginErrorType = 1
-	PasswordDoesMatch  LoginErrorType = 2
+	UserLoginNotExists   LoginErrorType = 0
+	EmailNotExists       LoginErrorType = 1
+	PasswordDoesNotMatch LoginErrorType = 2
 )
 
 type LoginOuput struct {
@@ -61,7 +61,7 @@ func (uc *LoginUserUseCase) Execute(loginInput LoginInput) (*LoginOuput, error) 
 		!uc.PasswordHasher.VerifyPassword(loginInput.Password, userToCheck.Password) {
 		return &LoginOuput{
 			IsSucceed: false,
-			ErrorType: PasswordDoesMatch,
+			ErrorType: PasswordDoesNotMatch,
 		}, nil
 	}
 

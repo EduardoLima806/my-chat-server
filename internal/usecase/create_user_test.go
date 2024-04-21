@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -60,6 +61,25 @@ func Test_If_Get_Error_When_Create_An_Existing_User(t *testing.T) {
 		_, err := ucCreate.Execute(userInput)
 		assert.EqualError(t, err, fmt.Sprintf("already exists an user with this e-email: %s", userInput.Email))
 	})
+}
+
+func Test_If_Get_Error_When_Try_Encrypt_Password(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	userRepository := repository.NewUserRepository(db)
+	passHasherMock := &MockPasswordHasher{}
+	userInput := UserInput{UserName: "edulima", Email: "eduardolima@gmail.com", Password: "P4$$w0rd"}
+	ucCreate := NewCreateUserUseCase(userRepository, passHasherMock)
+
+	rows := sqlmock.NewRows([]string{"id", "username", "displayname", "email", "password", "created"}).AddRow(1, "eduardolima806", "Eduardo Lima", "eduardolima.dev.io@gmail.com", "P4$$w0rd", time.Now())
+	rows2 := sqlmock.NewRows([]string{"id", "username", "displayname", "email", "password", "created"}).AddRow(1, "eduardolima806", "Eduardo Lima", "eduardolima.dev.io@gmail.com", "P4$$w0rd", time.Now())
+	mock.ExpectQuery("SELECT id, username, displayname, email, password, created FROM app_user").WillReturnRows(rows)
+	mock.ExpectQuery("SELECT id, username, displayname, email, password, created FROM app_user").WillReturnRows(rows2)
+
+	passHasherMock.On("HashPassword", userInput.Password).Return("", errors.New("encryptation error")).Once()
+
+	userCreateOutput, err := ucCreate.Execute(userInput)
+	assert.Nil(t, userCreateOutput)
+	assert.EqualError(t, err, "could not be possible encrypt password")
 }
 
 func Test_User_Is_Created_When_User_No_Existing(t *testing.T) {
