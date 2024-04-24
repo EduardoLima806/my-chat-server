@@ -1,4 +1,4 @@
-package usecase
+package user_usecase
 
 import (
 	"database/sql"
@@ -29,6 +29,10 @@ type LoginOuput struct {
 type LoginUserUseCase struct {
 	UserRepository domain.UserRepositoryInterface
 	PasswordHasher util.PasswordHasher
+}
+
+type LoginUserUseCaseInterface interface {
+	Execute(input LoginInput) (*LoginOuput, error)
 }
 
 func NewLoginUserUseCase(userRepo domain.UserRepositoryInterface, passwordHasher util.PasswordHasher) *LoginUserUseCase {

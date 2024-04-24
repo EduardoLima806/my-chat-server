@@ -1,4 +1,4 @@
-package usecase
+package user_usecase
 
 import (
 	"database/sql"
@@ -18,6 +18,10 @@ type UserInput struct {
 
 type UserOutput struct {
 	CreatedUserId int32
+}
+
+type CreateUserUseCaseInterface interface {
+	Execute(input UserInput) (*UserOutput, error)
 }
 
 type CreateUserUseCase struct {

@@ -1,0 +1,14 @@
+app:
+  name: 'Chat Server'
+  version: '1.0.0'
+
+http:
+  port: '8080'
+
+postgres:
+  database_driver: "postgres"
+  db_host: "localhost"
+  db_port: "5432"
+  db_user: "postgres"
+  db_password: "postgres"
+  db_name: "chat_server"

@@ -1,0 +1,26 @@
+@host = http://localhost:8080
+@baseUrl = {{host}}/api/v1
+
+GET {{host}}/health HTTP/1.1
+
+###
+
+POST {{baseUrl}}/users/create-user HTTP/1.1
+Content-Type: application/json
+
+{
+    "userName": "eduardolima806",
+    "displayName": "Eduardo Lima",
+    "email": "eduardolima.dev.io@gmail.com",
+    "password": "P4$$w0rd001"
+} 
+
+###
+
+POST {{baseUrl}}/users/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "login": "eduardolima806",
+    "password": "P4$$w0rd001"
+} 
