@@ -41,24 +41,24 @@ func NewCreateUserUseCase(userRepository domain.UserRepositoryInterface, passwor
 func (cUser *CreateUserUseCase) Execute(userInput UserInput) (*UserOutput, error) {
 	user, err := domain.NewUser(IdDummy, userInput.UserName, userInput.DisplayName, userInput.Email, userInput.Password)
 	if err != nil {
-		return nil, err
+		return nil, domain.CreateError(domain.ErrBadRequest.Error(), err.Error())
 	}
 
 	err = checkIfUserExists(cUser, userInput)
 	if err != nil {
-		return nil, err
+		return nil, domain.CreateError(domain.ErrBadRequest.Error(), err.Error())
 	}
 
 	user.Password, err = cUser.PasswordHasher.HashPassword(user.Password)
 
 	if err != nil {
-		return nil, errors.New("could not be possible encrypt password")
+		return nil, domain.CreateError(domain.ErrInternalServerError.Error(), err.Error())
 	}
 
 	idUserCreated, err := cUser.UserRepository.Save(user)
 
 	if err != nil {
-		return nil, err
+		return nil, domain.CreateError(domain.ErrInternalServerError.Error(), "could not possible to save user")
 	}
 
 	return &UserOutput{

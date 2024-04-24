@@ -21,7 +21,7 @@ func Run(cfg *config.Config) {
 	conn, err := db.ConnectToPostgresDb(cfg.PG)
 
 	if err != nil {
-		fmt.Errorf("failed to connect to database %w", err)
+		fmt.Println(fmt.Errorf("failed to connect to database %w", err))
 	}
 
 	defer func(conn *sql.DB) {

@@ -13,12 +13,15 @@ type LoginInput struct {
 	Password string
 }
 
-type LoginErrorType uint8
+type LoginErrorType struct {
+	Code        uint8
+	Description string
+}
 
-const (
-	UserLoginNotExists   LoginErrorType = 0
-	EmailNotExists       LoginErrorType = 1
-	PasswordDoesNotMatch LoginErrorType = 2
+var (
+	UserLoginNotExists   = LoginErrorType{0, "user login does not exists"}
+	EmailNotExists       = LoginErrorType{1, "email does not exists"}
+	PasswordDoesNotMatch = LoginErrorType{2, "password does not match"}
 )
 
 type LoginOuput struct {
@@ -57,7 +60,7 @@ func (uc *LoginUserUseCase) Execute(loginInput LoginInput) (*LoginOuput, error) 
 				ErrorType: errType,
 			}, nil
 		} else {
-			return nil, err
+			return nil, domain.CreateError(domain.ErrInternalServerError.Error(), "could not possible to fetch user")
 		}
 	}
 

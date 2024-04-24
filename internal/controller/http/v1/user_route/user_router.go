@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/eduardolima806/my-chat-server/internal/domain"
 	"github.com/eduardolima806/my-chat-server/internal/usecase/user_usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -52,10 +53,7 @@ func (route *userRouter) createUser(ctx *gin.Context) {
 	userOutput, err := route.useCase.CreateUserUseCase.Execute(*body.toUserInput())
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Error to create user",
-			"error":   err.Error(),
-		})
+		ctx.JSON(domain.GetHttpStatusCode(err), domain.ErrorCodeResponse(err))
 	} else {
 		ctx.JSON(http.StatusOK, userOutput)
 	}
@@ -79,13 +77,14 @@ func (route *userRouter) loginUser(ctx *gin.Context) {
 	userOutput, err := route.useCase.LoginUserUseCase.Execute(*body.tLoginInput())
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Error to login user",
-			"error":   err.Error(),
-		})
+		ctx.JSON(http.StatusInternalServerError, domain.ErrorCodeResponse(err))
 	} else {
-		// TODO: Should we have generate any token login?
-		ctx.JSON(http.StatusOK, userOutput)
+		if userOutput.IsSucceed {
+			ctx.JSON(http.StatusOK, "login succeed")
+		} else {
+			err := domain.CreateError(domain.ErrBadRequest.Error(), userOutput.ErrorType.Description)
+			ctx.JSON(http.StatusBadRequest, domain.ErrorCodeResponse(err))
+		}
 	}
 }
 

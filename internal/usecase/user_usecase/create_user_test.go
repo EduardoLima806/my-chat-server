@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/eduardolima806/my-chat-server/internal/domain"
 	"github.com/eduardolima806/my-chat-server/internal/infra/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -33,7 +34,8 @@ func Test_If_Get_Error_To_Create_Invalid_User(t *testing.T) {
 	userInput := UserInput{UserName: "ed12"}
 	ucCreate := NewCreateUserUseCase(userRepository, passHasherMock)
 	_, err := ucCreate.Execute(userInput)
-	assert.EqualError(t, err, "username must has at least 5 alphanumerics characters")
+	expectedError := domain.CreateError(domain.ErrBadRequest.Error(), "username must has at least 5 alphanumerics characters")
+	assert.EqualError(t, err, expectedError.Error())
 }
 
 func Test_If_Get_Error_When_Create_An_Existing_User(t *testing.T) {
@@ -48,7 +50,8 @@ func Test_If_Get_Error_When_Create_An_Existing_User(t *testing.T) {
 		mock.ExpectQuery("SELECT id, username, displayname, email, password, created FROM app_user").WillReturnRows(rows)
 
 		_, err := ucCreate.Execute(userInput)
-		assert.EqualError(t, err, "username already exists")
+		expectedError := domain.CreateError(domain.ErrBadRequest.Error(), "username already exists")
+		assert.EqualError(t, err, expectedError.Error())
 	})
 
 	t.Run("email already exists", func(t *testing.T) {
@@ -59,7 +62,8 @@ func Test_If_Get_Error_When_Create_An_Existing_User(t *testing.T) {
 
 		userInput.UserName = "eduardo123"
 		_, err := ucCreate.Execute(userInput)
-		assert.EqualError(t, err, fmt.Sprintf("already exists an user with this e-email: %s", userInput.Email))
+		expectedError := domain.CreateError(domain.ErrBadRequest.Error(), fmt.Sprintf("already exists an user with this e-email: %s", userInput.Email))
+		assert.EqualError(t, err, expectedError.Error())
 	})
 }
 
@@ -79,7 +83,8 @@ func Test_If_Get_Error_When_Try_Encrypt_Password(t *testing.T) {
 
 	userCreateOutput, err := ucCreate.Execute(userInput)
 	assert.Nil(t, userCreateOutput)
-	assert.EqualError(t, err, "could not be possible encrypt password")
+	expecteError := domain.CreateError(domain.ErrInternalServerError.Error(), "encryptation error")
+	assert.EqualError(t, err, expecteError.Error())
 }
 
 func Test_User_Is_Created_When_User_No_Existing(t *testing.T) {
