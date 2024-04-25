@@ -3,6 +3,7 @@ package user_route
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/eduardolima806/my-chat-server/internal/domain"
 	"github.com/eduardolima806/my-chat-server/internal/usecase/user_usecase"
@@ -42,11 +43,11 @@ func (route *userRouter) createUser(ctx *gin.Context) {
 		// TODO: Include logger interface
 		// fmt.Errorf("http - v1 - create a user route")
 		fmt.Println("http - v1 - create a user route")
-		// TODO: Include custom errors
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error to bind user data",
-			"error":   err.Error(),
-		})
+		strErr := strings.ReplaceAll(err.Error(), "\n", "\\n")
+		bindErr := domain.CreateError(domain.ErrBadRequest.Error(), strErr)
+		bindErrStruct := domain.ErrorCodeResponse(bindErr)
+		bindErrStruct.ErrorMessage = fmt.Sprintf("Error to bind user data: %s", bindErr.Error())
+		ctx.JSON(domain.GetHttpStatusCode(bindErr), bindErrStruct)
 		return
 	}
 
@@ -66,11 +67,11 @@ func (route *userRouter) loginUser(ctx *gin.Context) {
 		// TODO: Include logger interface
 		// fmt.Errorf("http - v1 - create a user route")
 		fmt.Println("http - v1 - login user route")
-		// TODO: Include custom errors
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error to bind login data",
-			"error":   err.Error(),
-		})
+		strErr := strings.ReplaceAll(err.Error(), "\n", "\\n")
+		bindErr := domain.CreateError(domain.ErrBadRequest.Error(), strErr)
+		bindErrStruct := domain.ErrorCodeResponse(bindErr)
+		bindErrStruct.ErrorMessage = fmt.Sprintf("Error to bind login data: %s", bindErr.Error())
+		ctx.JSON(domain.GetHttpStatusCode(bindErr), bindErrStruct)
 		return
 	}
 

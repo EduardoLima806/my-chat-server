@@ -15,7 +15,6 @@ var (
 	ErrConflict            = errors.New("CONFLICT")
 	ErrInsufficientFund    = errors.New("INSUFFICIENT_FUND")
 	ErrUnauthorized        = errors.New("UNAUTHORIZED")
-	errStruct              ErrorCodesStruct
 )
 
 type ErrorCodesStruct struct {
@@ -53,6 +52,7 @@ func GetHttpStatusCode(err error) int {
 }
 
 func extractErroCode(err error) string {
+	var errStruct ErrorCodesStruct
 	s := err.Error()
 
 	_ = json.Unmarshal([]byte(s), &errStruct)
@@ -61,6 +61,7 @@ func extractErroCode(err error) string {
 }
 
 func ErrorCodeResponse(err error) ErrorCodesStruct {
+	var errStruct ErrorCodesStruct
 	s := err.Error()
 
 	_ = json.Unmarshal([]byte(s), &errStruct)
